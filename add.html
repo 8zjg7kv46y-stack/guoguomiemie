@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="./style.css" />
+  <title>添加回忆（仅果果使用）</title>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand"><div class="dot"></div><strong>添加回忆（仅果果使用）</strong></div>
+      <div class="nav">
+        <a href="./index.html">返回主页</a>
+      </div>
+    </div>
+
+    <section class="grid">
+      <div class="card">
+        <h2>新增一条回忆</h2>
+        <div class="small">填完后点“导出 memories.json”，然后用导出的文件替换原来的 memories.json。</div>
+
+        <div style="margin-top:12px; display:grid; gap:10px;">
+          <label class="small">日期（建议填）
+            <input id="date" class="input" placeholder="例如 2026-02-02" />
+          </label>
+          <label class="small">标题（必填）
+            <input id="title" class="input" placeholder="例如 第一次一起吃火锅" />
+          </label>
+          <label class="small">正文（必填）
+            <textarea id="text" class="input" style="height:160px; line-height:1.6;" placeholder="写具体细节：在哪里、他做了什么、你当时的感觉。越具体越感动。"></textarea>
+          </label>
+          <label class="small">标签（可选，用逗号分隔）
+            <input id="tags" class="input" placeholder="例如 日常, 心动, 旅行" />
+          </label>
+
+          <div class="row">
+            <button class="btn primary" id="add">加入列表</button>
+            <button class="btn" id="export">导出 memories.json</button>
+          </div>
+
+          <div class="card" style="margin-top:10px;">
+            <h2>当前新增预览</h2>
+            <pre id="preview" style="white-space:pre-wrap; color:var(--muted); margin:0;"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+let data = null;
+let added = [];
+
+async function load(){
+  const res = await fetch("./memories.json?v=" + Date.now());
+  data = await res.json();
+  document.getElementById("preview").textContent = "已加载 memories.json。你新增的回忆会显示在这里。";
+}
+load();
+
+function getForm(){
+  const date = document.getElementById("date").value.trim();
+  const title = document.getElementById("title").value.trim();
+  const text = document.getElementById("text").value.trim();
+  const tags = document.getElementById("tags").value.split(",").map(s=>s.trim()).filter(Boolean);
+  return { date, title, text, tags, photos: [] };
+}
+
+document.getElementById("add").onclick = ()=>{
+  if(!data) return;
+  const m = getForm();
+  if(!m.title || !m.text){
+    alert("标题和正文至少填一下～");
+    return;
+  }
+  added.unshift(m);
+  data.memories = data.memories || [];
+  data.memories.unshift(m);
+  document.getElementById("preview").textContent = JSON.stringify(added, null, 2);
+
+  document.getElementById("title").value = "";
+  document.getElementById("text").value = "";
+  document.getElementById("tags").value = "";
+  document.getElementById("date").value = "";
+};
+
+document.getElementById("export").onclick = ()=>{
+  if(!data) return;
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "memories.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+</script>
+</body>
+</html>

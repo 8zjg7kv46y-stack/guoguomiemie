@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <div class="dot"></div>
+        <strong id="names">果果（张津硕） & 咩咩（陈鑫旸）</strong>
+      </div>
+      <div class="nav">
+        <a href="#timelineCard">回忆</a>
+        <a href="#letterCard">信</a>
+        <a href="#bucketCard">未来</a>
+        <button id="openBg" title="上传/切换背景">背景</button>
+        <button id="openDaily" title="今日随机回忆">今日随机回忆</button>
+        <!-- 如果你要把网页发给咩咩看，建议把下一行删掉（不让他看到“添加回忆”入口） -->
+        <a href="./add.html" title="只给果果用">添加回忆</a>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="kicker">guoguoandmiemie</div>
+      <h1>在一起第 <span id="dayCount">1</span> 天</h1>
+      <p class="sub" id="subtitle">我想把我们每一个小瞬间，都认真收藏。等你哪天累了，就来这里充电。</p>
+
+      <div class="stats" aria-label="time status">
+        <div class="stat">
+          <div class="label">中国时间（北京时间）</div>
+          <div class="value" id="chinaTime">—</div>
+          <div class="hint">Asia/Shanghai</div>
+        </div>
+        <div class="stat">
+          <div class="label">英国时间（伦敦）</div>
+          <div class="value" id="ukTime">—</div>
+          <div class="hint">Europe/London</div>
+        </div>
+        <div class="stat">
+          <div class="label">我们在一起已经</div>
+          <div class="value" id="togetherTime">—</div>
+          <div class="hint">精确到每秒（起点按中国时间）</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <a class="btn primary" href="#letterCard">先看我写给你的话</a>
+        <a class="btn" href="#timelineCard">进入回忆时间线</a>
+      </div>
+      <div class="small" id="startNote" style="margin-top:10px;"></div>
+    </section>
+
+    <section class="grid">
+      <div class="card" id="letterCard">
+        <h2>写给咩咩的一封信</h2>
+        <div class="small">果果写的（你也可以随时改成更私人的版本）</div>
+        <hr class="sep" />
+        <div style="line-height:1.85; color:var(--muted);">
+          <p>咩咩，今天是我们在一起的第 <span id="dayCountInline">—</span> 天。</p>
+          <p>我想做这个网页，不是为了“纪念一个日期”，而是为了纪念你带给我的感觉：被认真对待、被照顾、被在意。</p>
+          <p>我可能不太会表达，但我真的很想把我们每一个小瞬间都保存下来：你说过的话、你做过的事、我当时心里那一下的软。</p>
+          <p>以后不管我们忙、累、或者偶尔闹别扭，你都可以来这里看一眼。你会知道：我一直站在你这边。</p>
+          <p style="margin-top:14px; color:var(--text);">—— 你的果果（张津硕）</p>
+        </div>
+      </div>
+
+      <div class="card" id="timelineCard">
+        <h2>回忆时间线</h2>
+        <div class="small">每一条都是我想留住的瞬间（这里可以无限追加）。</div>
+        <div class="timeline" id="timeline"></div>
+      </div>
+
+      <div class="card" id="bucketCard">
+        <h2>未来清单</h2>
+        <div class="small">我想和你一起完成的小事。</div>
+        <div class="list" id="bucket"></div>
+      </div>
+    </section>
+
+    <footer>
+      © <span id="year"></span> · guoguoandmiemie
+    </footer>
+  </div>
+
+  <!-- 背景设置弹窗 -->
+  <div class="modal" id="bgModal" role="dialog" aria-modal="true" aria-label="背景设置">
+    <div class="sheet">
+      <div class="row2" style="justify-content:space-between;">
+        <h3>背景设置</h3>
+        <button class="btn" id="closeBg">关闭</button>
+      </div>
+
+      <div class="small" style="margin-top:6px;">
+        提醒：上传背景会保存在你这台设备的浏览器里（localStorage）。如果换电脑/换手机，需要重新选一次背景。
+      </div>
+
+      <hr class="sep" />
+
+      <div class="small">① 上传一张图片当背景（推荐）</div>
+      <input id="bgFile" class="input" type="file" accept="image/*" />
+
+      <div class="small" style="margin-top:10px;">② 或者填一个图片链接（可选）</div>
+      <div class="row2">
+        <input id="bgUrl" class="input" placeholder="https://.../background.jpg" />
+        <button class="btn primary" id="saveBgUrl">保存链接</button>
+      </div>
+
+      <div class="small" style="margin-top:12px;">③ 快速预设（无需联网）</div>
+      <div class="pills">
+        <button class="pill" data-bg='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%23ff6a00"/><stop offset="1" stop-color="%2300aaff"/></linearGradient></defs><rect width="1600" height="900" fill="url(%23g)"/></svg>'>暖橙×蓝渐变</button>
+        <button class="pill" data-bg='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900"><defs><radialGradient id="g" cx="30%25" cy="20%25" r="80%25"><stop offset="0" stop-color="%23ffffff" stop-opacity=".25"/><stop offset="1" stop-color="%230b0c10"/></radialGradient></defs><rect width="1600" height="900" fill="%230b0c10"/><rect width="1600" height="900" fill="url(%23g)"/></svg>'>低调暗夜</button>
+        <button class="pill" data-bg='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="%23212a3a"/><stop offset="1" stop-color="%230b0c10"/></linearGradient></defs><rect width="1600" height="900" fill="url(%23g)"/><circle cx="1200" cy="180" r="140" fill="%23ff6a00" fill-opacity=".12"/><circle cx="980" cy="260" r="220" fill="%2300aaff" fill-opacity=".10"/></svg>'>高级冷调</button>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="resetBg">恢复默认背景</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 今日随机回忆弹窗 -->
+  <div class="modal" id="dailyModal" role="dialog" aria-modal="true" aria-label="今日随机回忆">
+    <div class="sheet">
+      <div class="row2" style="justify-content:space-between;">
+        <h3>今日随机回忆</h3>
+        <button class="btn" id="closeDaily">关闭</button>
+      </div>
+
+      <div class="small" id="dailyHint" style="margin-top:6px;"></div>
+      <hr class="sep" />
+
+      <div class="item" style="margin-top:10px;">
+        <div class="meta">
+          <div class="date" id="dailyDate">—</div>
+        </div>
+        <h3 id="dailyTitle">—</h3>
+        <p id="dailyText">—</p>
+        <div class="tags" id="dailyTags"></div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="anotherDaily">再来一条</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script id="embeddedData" type="application/json">
+{
+  "couple": {
+    "title": "guoguoandmiemie",
+    "names": "果果（张津硕） & 咩咩（陈鑫旸）",
+    "startDateChina": "2026-01-04 09:44:00",
+    "startInstantUTC": "2026-01-04T01:44:00Z",
+    "subtitle": "我想把我们每一个小瞬间，都认真收藏。等你哪天累了，就来这里充电。"
+  },
+  "memories": [
+    {
+      "date": "2026-01-04",
+      "title": "我们正式在一起的第一天",
+      "text": "从这一天开始，我的日常里多了一个特别的人。以后不管开心还是难过，我都想和你并肩站在一起。",
+      "tags": [
+        "纪念",
+        "开始"
+      ],
+      "photos": []
+    },
+    {
+      "date": "2026-02-02",
+      "title": "第一个月",
+      "text": "我们在一起满一个月了。我想把这一段时间的点滴都放进来：小事、情绪、笑点、还有你给我的安全感。希望你每次打开，都能感受到：我很认真地爱你。",
+      "tags": [
+        "一个月",
+        "感动"
+      ],
+      "photos": []
+    }
+  ],
+  "bucketList": [
+    {
+      "done": false,
+      "text": "一起拍一次正式的合照"
+    },
+    {
+      "done": false,
+      "text": "一起做一顿饭（哪怕翻车）"
+    },
+    {
+      "done": false,
+      "text": "一起散步一小时，不看手机"
+    },
+    {
+      "done": false,
+      "text": "一起去一个陌生的小城市住一晚"
+    },
+    {
+      "done": false,
+      "text": "一起做一个只属于我们的相册/纪念册"
+    }
+  ]
+}
+  </script>
+  <script src="./app.js"></script>
+</body>
+</html>
