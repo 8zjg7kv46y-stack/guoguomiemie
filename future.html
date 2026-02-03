@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>打卡100｜guoguoandmiemie</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .wrap{max-width:980px;margin:0 auto;padding:18px 16px 40px;}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+    .topbar a{text-decoration:none;}
+    .h1{font-size:22px;font-weight:800;letter-spacing:.5px;}
+    .sub{opacity:.75;font-size:13px;line-height:1.5;}
+    .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 10px;}
+    .input{flex:1;min-width:210px;}
+    .input input{width:100%;padding:10px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.22);color:inherit;outline:none;}
+    .seg{display:flex;gap:8px;flex-wrap:wrap;}
+    .seg button{padding:9px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.22);color:inherit;cursor:pointer;}
+    .seg button.active{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22);}
+    .progress{margin:10px 0 16px;}
+    .bar{height:10px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;}
+    .bar > div{height:100%;width:0%;background:rgba(255,255,255,.70);}
+    .ptext{font-size:13px;opacity:.8;margin-top:8px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    @media (max-width:720px){.grid{grid-template-columns:1fr;}}
+    .card{border-radius:18px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.20);padding:12px 12px;display:flex;gap:10px;align-items:flex-start;}
+    .num{width:34px;height:34px;border-radius:12px;background:rgba(255,255,255,.10);display:flex;align-items:center;justify-content:center;font-weight:800;}
+    .main{flex:1;}
+    .label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;}
+    .label input{transform:translateY(2px);width:18px;height:18px;}
+    .text{font-size:15px;line-height:1.45;}
+    .muted{opacity:.65;font-size:12px;margin-top:4px;}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+    .actions button{padding:9px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.22);color:inherit;cursor:pointer;}
+    .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:rgba(0,0,0,.78);border:1px solid rgba(255,255,255,.18);color:#fff;padding:10px 12px;border-radius:14px;opacity:0;pointer-events:none;transition:.25s;}
+    .toast.show{opacity:1;}
+  </style>
+</head>
+<body>
+<div class="hearts" aria-hidden="true">
+  <div class="heart" style="left:4%; animation-duration:10s; animation-delay:-0s;">💗</div>
+  <div class="heart" style="left:12%; animation-duration:12s; animation-delay:-1s;">💖</div>
+  <div class="heart" style="left:20%; animation-duration:14s; animation-delay:-2s;">💞</div>
+  <div class="heart" style="left:28%; animation-duration:16s; animation-delay:-3s;">💗</div>
+  <div class="heart" style="left:36%; animation-duration:18s; animation-delay:-4s;">💖</div>
+  <div class="heart" style="left:44%; animation-duration:20s; animation-delay:-5s;">💞</div>
+  <div class="heart" style="left:52%; animation-duration:10s; animation-delay:-6s;">💗</div>
+  <div class="heart" style="left:60%; animation-duration:12s; animation-delay:-0s;">💖</div>
+  <div class="heart" style="left:68%; animation-duration:14s; animation-delay:-1s;">💞</div>
+  <div class="heart" style="left:76%; animation-duration:16s; animation-delay:-2s;">💗</div>
+  <div class="heart" style="left:84%; animation-duration:18s; animation-delay:-3s;">💖</div>
+  <div class="heart" style="left:92%; animation-duration:20s; animation-delay:-4s;">💞</div>
+</div>
+
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="h1">情侣打卡100件事</div>
+        <div class="sub">可以打勾✅，会自动保存（同一设备/同一浏览器里长期有效）。你们完成一件，就来打一下勾。</div>
+      </div>
+      <a class="btn" href="./index.html">返回首页</a>
+    </div>
+
+    <div class="controls">
+      <div class="input">
+        <input id="q" placeholder="搜索关键词，比如：海边 / 电影 / 旅行…" />
+      </div>
+      <div class="seg" role="tablist" aria-label="筛选">
+        <button id="f_all" class="active" data-filter="all">全部</button>
+        <button id="f_done" data-filter="done">已打勾</button>
+        <button id="f_todo" data-filter="todo">未打勾</button>
+      </div>
+      <div class="actions">
+        <button id="btnExport" title="导出备份（JSON）">导出备份</button>
+        <button id="btnImport" title="导入备份（JSON）">导入备份</button>
+        <button id="btnReset" title="清空所有勾选">清空勾选</button>
+      </div>
+    </div>
+
+    <div class="progress">
+      <div class="bar"><div id="barFill"></div></div>
+      <div class="ptext">
+        <div id="pLeft">已完成 0 / 100</div>
+        <div id="pRight">完成率 0%</div>
+      </div>
+    </div>
+
+    <div class="grid" id="list"></div>
+  </div>
+
+  <input id="filePick" type="file" accept="application/json" style="display:none" />
+  <div class="toast" id="toast">已保存</div>
+
+  <script id="futureData" type="application/json">
+[
+  {
+    "id": 1,
+    "text": "一起过生日"
+  },
+  {
+    "id": 2,
+    "text": "一起去旅行"
+  },
+  {
+    "id": 3,
+    "text": "一起过情人节"
+  },
+  {
+    "id": 4,
+    "text": "一起吃海底捞"
+  },
+  {
+    "id": 5,
+    "text": "一起吊娃娃"
+  },
+  {
+    "id": 6,
+    "text": "一起去海边"
+  },
+  {
+    "id": 7,
+    "text": "一起回老家"
+  },
+  {
+    "id": 8,
+    "text": "一起看电影"
+  },
+  {
+    "id": 9,
+    "text": "一起大扫除"
+  },
+  {
+    "id": 10,
+    "text": "一起穿情侣装"
+  },
+  {
+    "id": 11,
+    "text": "一起吃火锅"
+  },
+  {
+    "id": 12,
+    "text": "一起吃烤肉"
+  },
+  {
+    "id": 13,
+    "text": "一起吃烤鱼"
+  },
+  {
+    "id": 14,
+    "text": "一起吃宵夜"
+  },
+  {
+    "id": 15,
+    "text": "一起打羽毛球"
+  },
+  {
+    "id": 16,
+    "text": "一起逛菜市场"
+  },
+  {
+    "id": 17,
+    "text": "一起做饭"
+  },
+  {
+    "id": 18,
+    "text": "一起跑步"
+  },
+  {
+    "id": 19,
+    "text": "一起搬家"
+  },
+  {
+    "id": 20,
+    "text": "一起去游乐园"
+  },
+  {
+    "id": 21,
+    "text": "一起制作专属相册"
+  },
+  {
+    "id": 22,
+    "text": "一起用情侣手机壳"
+  },
+  {
+    "id": 23,
+    "text": "一起用勺子吃西瓜"
+  },
+  {
+    "id": 24,
+    "text": "一起发朋友圈合照"
+  },
+  {
+    "id": 25,
+    "text": "一起海边看日落"
+  },
+  {
+    "id": 26,
+    "text": "一起拍日常vlog"
+  },
+  {
+    "id": 27,
+    "text": "一起庆祝纪念日"
+  },
+  {
+    "id": 28,
+    "text": "一起晚饭后散步"
+  },
+  {
+    "id": 29,
+    "text": "一起跟朋友吃饭"
+  },
+  {
+    "id": 30,
+    "text": "一起换情侣头像"
+  },
+  {
+    "id": 31,
+    "text": "一起玩五子棋"
+  },
+  {
+    "id": 32,
+    "text": "一起骑电动车"
+  },
+  {
+    "id": 33,
+    "text": "一起去小吃街"
+  },
+  {
+    "id": 34,
+    "text": "一起自驾游"
+  },
+  {
+    "id": 35,
+    "text": "一起打电动"
+  },
+  {
+    "id": 36,
+    "text": "一起玩游戏"
+  },
+  {
+    "id": 37,
+    "text": "一起看球赛"
+  },
+  {
+    "id": 38,
+    "text": "一起剪头发"
+  },
+  {
+    "id": 39,
+    "text": "一起刮彩票"
+  },
+  {
+    "id": 40,
+    "text": "一起逛超市"
+  },
+  {
+    "id": 41,
+    "text": "一起买家具"
+  },
+  {
+    "id": 42,
+    "text": "一起打扑克"
+  },
+  {
+    "id": 43,
+    "text": "一起跨年"
+  },
+  {
+    "id": 44,
+    "text": "一起健身"
+  },
+  {
+    "id": 45,
+    "text": "一起划船"
+  },
+  {
+    "id": 46,
+    "text": "一起赏花"
+  },
+  {
+    "id": 47,
+    "text": "一起熬夜"
+  },
+  {
+    "id": 48,
+    "text": "一起种植物"
+  },
+  {
+    "id": 49,
+    "text": "介绍给彼此的朋友"
+  },
+  {
+    "id": 50,
+    "text": "给对方准备礼物"
+  },
+  {
+    "id": 51,
+    "text": "难过时的陪伴"
+  },
+  {
+    "id": 52,
+    "text": "给我吹头发"
+  },
+  {
+    "id": 53,
+    "text": "给我穿鞋"
+  },
+  {
+    "id": 54,
+    "text": "照顾对方"
+  },
+  {
+    "id": 55,
+    "text": "陪我做美甲"
+  },
+  {
+    "id": 56,
+    "text": "接我下班"
+  },
+  {
+    "id": 57,
+    "text": "拥有车子"
+  },
+  {
+    "id": 58,
+    "text": "给我送花"
+  },
+  {
+    "id": 59,
+    "text": "吵架"
+  },
+  {
+    "id": 60,
+    "text": "一起参加别人的婚礼"
+  },
+  {
+    "id": 61,
+    "text": "一起去听一场演唱会"
+  },
+  {
+    "id": 62,
+    "text": "一起去农场摘水果"
+  },
+  {
+    "id": 63,
+    "text": "一起逛盒马生鲜"
+  },
+  {
+    "id": 64,
+    "text": "一起逛花鸟市场"
+  },
+  {
+    "id": 65,
+    "text": "一起拍情侣写真"
+  },
+  {
+    "id": 66,
+    "text": "一起去南山祈福"
+  },
+  {
+    "id": 67,
+    "text": "一起去水上乐园"
+  },
+  {
+    "id": 68,
+    "text": "一起海边看日出"
+  },
+  {
+    "id": 69,
+    "text": "一起坐绿皮火车"
+  },
+  {
+    "id": 70,
+    "text": "一起去天涯海角"
+  },
+  {
+    "id": 71,
+    "text": "一起去迪士尼"
+  },
+  {
+    "id": 72,
+    "text": "一起放孔明灯"
+  },
+  {
+    "id": 73,
+    "text": "一起户外烧烤"
+  },
+  {
+    "id": 74,
+    "text": "一起郊游踏青"
+  },
+  {
+    "id": 75,
+    "text": "一起坐直升机"
+  },
+  {
+    "id": 76,
+    "text": "一起去植物园"
+  },
+  {
+    "id": 77,
+    "text": "一起去动物园"
+  },
+  {
+    "id": 78,
+    "text": "一起坐飞机"
+  },
+  {
+    "id": 79,
+    "text": "一起住民宿"
+  },
+  {
+    "id": 80,
+    "text": "一起去体检"
+  },
+  {
+    "id": 81,
+    "text": "一起看烟花"
+  },
+  {
+    "id": 82,
+    "text": "一起打雪仗"
+  },
+  {
+    "id": 83,
+    "text": "一起敷面膜"
+  },
+  {
+    "id": 84,
+    "text": "一起坐缆车"
+  },
+  {
+    "id": 85,
+    "text": "一起K歌"
+  },
+  {
+    "id": 86,
+    "text": "一起钓鱼"
+  },
+  {
+    "id": 87,
+    "text": "一起潜水"
+  },
+  {
+    "id": 88,
+    "text": "一起冲浪"
+  },
+  {
+    "id": 89,
+    "text": "一起露营"
+  },
+  {
+    "id": 90,
+    "text": "一起爬山"
+  },
+  {
+    "id": 91,
+    "text": "一起漂流"
+  },
+  {
+    "id": 92,
+    "text": "一起喝酒"
+  },
+  {
+    "id": 93,
+    "text": "一起泡脚"
+  },
+  {
+    "id": 94,
+    "text": "一起见对方父母"
+  },
+  {
+    "id": 95,
+    "text": "一起出国旅游"
+  },
+  {
+    "id": 96,
+    "text": "一起领结婚证"
+  },
+  {
+    "id": 97,
+    "text": "一起买房子"
+  },
+  {
+    "id": 98,
+    "text": "一起结婚"
+  },
+  {
+    "id": 99,
+    "text": "一起生娃"
+  },
+  {
+    "id": 100,
+    "text": "一起白头偕老"
+  }
+]
+  </script>
+
+  <script>
+    const STORAGE_KEY = "guoguoandmiemie_future_checks_v1";
+
+    function loadChecks() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return {};
+        const obj = JSON.parse(raw);
+        return (obj && typeof obj === "object") ? obj : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveChecks(map) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+      toast("已保存 ✅");
+    }
+
+    function toast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>t.classList.remove("show"), 1200);
+    }
+
+    function percent(n, d) {
+      if (!d) return 0;
+      return Math.round((n / d) * 100);
+    }
+
+    const data = JSON.parse(document.getElementById("futureData").textContent);
+    let checks = loadChecks();
+    let filter = "all";
+
+    const elList = document.getElementById("list");
+    const elQ = document.getElementById("q");
+    const elBar = document.getElementById("barFill");
+    const elPL = document.getElementById("pLeft");
+    const elPR = document.getElementById("pRight");
+
+    function getDoneCount() {
+      return data.filter(x => checks[String(x.id)]).length;
+    }
+
+    function updateProgress() {
+      const done = getDoneCount();
+      const p = percent(done, data.length);
+      elBar.style.width = p + "%";
+      elPL.textContent = `已完成 ${done} / ${data.length}`;
+      elPR.textContent = `完成率 ${p}%`;
+    }
+
+    function matches(item, q) {
+      if (!q) return true;
+      const s = (item.text || "").toLowerCase();
+      return s.includes(q.toLowerCase());
+    }
+
+    function passesFilter(item) {
+      const done = !!checks[String(item.id)];
+      if (filter === "done") return done;
+      if (filter === "todo") return !done;
+      return true;
+    }
+
+    function render() {
+      const q = elQ.value.trim();
+      elList.innerHTML = "";
+      const frag = document.createDocumentFragment();
+
+      data.forEach(item => {
+        if (!matches(item, q)) return;
+        if (!passesFilter(item)) return;
+
+        const done = !!checks[String(item.id)];
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+          <div class="num">${item.id}</div>
+          <div class="main">
+            <label class="label">
+              <input type="checkbox" data-id="${item.id}" ${done ? "checked" : ""} />
+              <div class="text">${item.text}</div>
+            </label>
+            <div class="muted">${done ? "已完成 ✅" : "未完成"}</div>
+          </div>
+        `;
+        frag.appendChild(card);
+      });
+
+      elList.appendChild(frag);
+      updateProgress();
+    }
+
+    elList.addEventListener("change", (e) => {
+      const t = e.target;
+      if (t && t.matches("input[type=checkbox][data-id]")) {
+        const id = t.getAttribute("data-id");
+        if (t.checked) {
+          checks[id] = true;
+        } else {
+          delete checks[id];
+        }
+        saveChecks(checks);
+        render();
+      }
+    });
+
+    document.querySelectorAll(".seg button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".seg button").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        filter = btn.dataset.filter;
+        render();
+      });
+    });
+
+    elQ.addEventListener("input", () => render());
+
+    document.getElementById("btnExport").addEventListener("click", () => {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        checks
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type: "application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "guoguoandmiemie-打卡100-备份.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast("已导出备份");
+    });
+
+    const filePick = document.getElementById("filePick");
+    document.getElementById("btnImport").addEventListener("click", () => {
+      filePick.value = "";
+      filePick.click();
+    });
+
+    filePick.addEventListener("change", async () => {
+      const file = filePick.files && filePick.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const obj = JSON.parse(text);
+        if (!obj || typeof obj !== "object" || !obj.checks) {
+          toast("备份格式不对");
+          return;
+        }
+        checks = obj.checks;
+        saveChecks(checks);
+        toast("已导入备份 ✅");
+        render();
+      } catch (e) {
+        toast("导入失败");
+      }
+    });
+
+    document.getElementById("btnReset").addEventListener("click", () => {
+      if (!confirm("确定要清空所有勾选吗？")) return;
+      checks = {};
+      saveChecks(checks);
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
