@@ -9,6 +9,8 @@
   --radius:20px;
 }
 *{box-sizing:border-box}
+:root{--bg-image:var(--bg-image);}
+
 html,body{height:100%}
 body{
   margin:0;
@@ -25,8 +27,8 @@ body::before{
   position:fixed;
   inset:0;
   background:
-    linear-gradient(180deg, rgba(255,210,230,.55), rgba(255,242,247,.86)),
-    url("./bg.jpg");
+    linear-gradient(180deg, rgba(255,210,230,.30), rgba(255,242,247,.55)),
+    var(--bg-image);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -147,3 +149,8 @@ h1{font-size:34px; margin:10px 0 6px; letter-spacing:.3px}
   from{ transform:translateY(0) translateX(0) rotate(0deg); }
   to{ transform:translateY(-115vh) translateX(60px) rotate(18deg); }
 }
+
+
+.emo{font-size:1.05em;filter: drop-shadow(0 2px 8px rgba(255,105,180,.25));}
+
+.link{color:rgba(255,90,160,.95);text-decoration:underline;}

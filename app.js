@@ -160,7 +160,7 @@ function setupDailyMemory(data, couple){
 }
 
 function setupBackgroundUI(){
-  const KEY = "guoguoandmiemie_bg";
+  const KEY = "guoguoandmiemie_bg_v2";
   const saved = localStorage.getItem(KEY);
   if(saved) applyBackground(saved);
 
@@ -232,9 +232,9 @@ function renderStaticSections(data){
     wrap.innerHTML += `
       <div class="item">
         <div class="meta">
-          <div class="date">${escapeHtml(m.date || "—")}</div>
+          <div class="date">${escapeHtml((m.dateDisplay || m.date) || "—")}</div>
         </div>
-        <h3>${escapeHtml(m.title || "")}</h3>
+        <h3>${escapeHtml(m.title || "")}${m.emoji ? ` <span class="emo">${escapeHtml(m.emoji)}</span>` : ""}</h3>
         <p>${escapeHtml(m.text || "")}</p>
         <div class="tags">${tags}</div>
       </div>
@@ -242,21 +242,31 @@ function renderStaticSections(data){
   }
 
   // Bucket list
+  const card = document.getElementById("bucketCard");
   const list = document.getElementById("bucket");
   list.innerHTML = "";
-  (bucketList||[]).forEach((b)=>{
-    list.innerHTML += `
-      <label class="todo">
-        <input type="checkbox" ${b.done ? "checked":""} disabled />
-        <div>
-          <div>${escapeHtml(b.text)}</div>
-          <div class="small">（以后想升级：这里可以做成可点选并保存）</div>
-        </div>
-      </label>
+  const items = (bucketList||[]);
+  if(items.length === 0){
+    // No short demo list — guide to the 100-items checklist page
+    if(card) card.style.display = "";
+    list.innerHTML = `
+      <div class="small">未来清单在这里：<a class="link" href="./future.html">情侣打卡100件事</a> 💗</div>
     `;
-  });
-
-  // show start time note
+  } else {
+    if(card) card.style.display = "";
+    items.forEach((b)=>{
+      list.innerHTML += `
+        <label class="todo">
+          <input type="checkbox" ${b.done ? "checked":""} disabled />
+          <div>
+            <div>${escapeHtml(b.text)}</div>
+            <div class="small">（以后想升级：这里可以做成可点选并保存）</div>
+          </div>
+        </label>
+      `;
+    });
+  }
+// show start time note
   const startNote = document.getElementById("startNote");
   if(startNote){
     startNote.textContent = `起点（按中国时间）：${couple.startDateChina}  ·  统一换算UTC：${couple.startInstantUTC}`;
